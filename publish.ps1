@@ -47,7 +47,7 @@ if ($exists) {
   Write-Host "   仓库已存在: $Owner/$Name"
 } else {
   Write-Host "   创建公开仓库: $Owner/$Name"
-  $body = @{ name = $Name; private = $false; auto_init = $false; description = "每日成语日历挂件：拟物撕历、农历/节气、桌面挂件、141条成语库" } | ConvertTo-Json
+  $body = @{ name = $Name; private = $false; auto_init = $false; description = "每日成语日历挂件：拟物撕历、农历/节气、深色皮肤、371条成语库" } | ConvertTo-Json
   Invoke-RestMethod -Uri "https://api.github.com/user/repos" -Method Post -Headers $apiHeaders -Body $body -ContentType "application/json" | Out-Null
 }
 
