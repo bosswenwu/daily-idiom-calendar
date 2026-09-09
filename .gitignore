@@ -5,3 +5,11 @@ journal.md
 Thumbs.db
 node_modules/
 _preview.png
+
+# 私人 / 备份文件（不进仓库、不发布）
+记录.doc
+*.doc
+*.docx
+*.xlsx
+*.backup.html
+*.bak
