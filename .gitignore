@@ -1,0 +1,7 @@
+# 生成/临时文件
+journal.md
+*.log
+.DS_Store
+Thumbs.db
+node_modules/
+_preview.png
