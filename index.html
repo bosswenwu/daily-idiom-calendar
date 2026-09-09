@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-accent="R">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>每日成语 · 日历挂件</title>
+<style>
+  :root{
+    --paper:#f8f2e4; --paper-2:#efe5cd; --paper-3:#fbf6ea;
+    --ink:#33291f; --muted:#8b7a5f; --muted-2:#a4957c;
+    --line:#cbb98d; --line-dark:#a9955c; --gold:#b5912e; --gold-2:#8f711f;
+    --accent:#b23f2e; --accent-ink:#9a3327; --accent-glow:rgba(178,63,46,.16);
+    --green:#1c7a53; --green-2:#145d3f;
+    --shadow:85,64,36;
+    --serif:"Kaiti SC","STKaiti","KaiTi","Noto Serif SC","SimSun",serif;
+    --sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  }
+  html[data-accent="G"]{ --accent:#1c7a53; --accent-ink:#135c40; --accent-glow:rgba(28,122,83,.16); }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:16px; padding:26px 16px;
+    font-family:var(--sans); color:var(--ink);
+    background:
+      radial-gradient(1000px 520px at 18% -12%, rgba(255,252,240,.9), transparent 60%),
+      radial-gradient(900px 620px at 112% 118%, #e7d9ba, transparent 55%),
+      linear-gradient(160deg,#eee2cb,#d9cbae 100%);
+    position:relative; overflow-x:hidden;
+  }
+  body::before, body::after{
+    content:"";
+    position:fixed; border-radius:50%; filter:blur(2px); opacity:.45; pointer-events:none;
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.7), rgba(225,205,160,.2) 70%);
+    z-index:0;
+  }
+  body::before{ width:320px; height:320px; top:-80px; left:-90px; }
+  body::after{ width:420px; height:420px; bottom:-140px; right:-120px; }
+  .bg-dots{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:radial-gradient(rgba(120,100,60,.10) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .toolbar{
+    position:relative; z-index:2;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;
+    max-width:480px; width:100%;
+  }
+  .brand{
+    font-family:var(--serif); font-size:17px; letter-spacing:3px; color:#6c5230;
+    margin-right:auto; white-space:nowrap;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .seal{
+    width:18px; height:18px; border-radius:4px;
+    background:linear-gradient(135deg,#c5452f,#a23a27);
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-size:11px; font-weight:700; font-family:var(--serif);
+    box-shadow:0 1px 2px rgba(90,60,30,.4);
+  }
+  .brand small{ font-size:11px; letter-spacing:1px; color:var(--muted); font-family:var(--sans); margin-left:2px; }
+  .btn{
+    appearance:none; border:1px solid var(--line-dark);
+    background:linear-gradient(180deg,#fffdf6,#f0e5cd); color:#6c5230;
+    border-radius:11px; padding:8px 13px; font-size:13px; font-family:var(--sans);
+    cursor:pointer; box-shadow:0 2px 0 rgba(90,70,40,.16), inset 0 1px 0 #fff;
+    transition:transform .06s ease, box-shadow .06s ease, background .15s ease;
+  }
+  .btn:hover{ filter:brightness(1.02); }
+  .btn:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(90,70,40,.16); }
+  .btn.primary{ background:linear-gradient(180deg,#7a5a2c,#6a4d25); color:#fff6e0; border-color:#5a431e; }
+  .btn.ghost{ background:transparent; box-shadow:none; }
+
+  /* ---------- 卡片 ---------- */
+  .card{
+    position:relative; z-index:2;
+    width:100%; max-width:480px;
+    border-radius:20px; padding:26px 26px 30px;
+    background:linear-gradient(180deg,var(--paper) 0%,var(--paper-2) 100%);
+    box-shadow:
+      0 30px 60px -22px rgba(var(--shadow),.52),
+      0 6px 18px -8px rgba(var(--shadow),.30),
+      inset 0 0 0 1px rgba(255,255,255,.55),
+      inset 0 0 60px rgba(190,158,92,.12);
+  }
+  .card::before{
+    content:""; position:absolute; inset:8px; border:1px solid var(--line);
+    border-radius:13px; pointer-events:none;
+  }
+  .card::after{
+    content:""; position:absolute; inset:12px; border:1px solid var(--line);
+    border-radius:10px; pointer-events:none; opacity:.7;
+  }
+  .orn{ position:absolute; pointer-events:none; color:var(--gold); font-family:serif; }
+  .orn.tl{ top:14px; left:16px; } .orn.tr{ top:14px; right:16px; }
+
+  .pins{ position:absolute; top:12px; left:0; right:0; display:flex; justify-content:space-around; pointer-events:none; }
+  .pins span{
+    width:9px; height:9px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, #cbb98d 55%, #9b854b);
+    box-shadow:0 1px 2px rgba(90,70,40,.45), inset 0 -1px 1px rgba(90,70,40,.3);
+  }
+
+  .tear{
+    position:absolute; left:0; right:0; bottom:-13px; height:18px; pointer-events:none;
+    background:
+      repeating-linear-gradient(115deg, transparent 0 6px, rgba(255,255,255,.55) 6px 7px, transparent 7px 13px),
+      repeating-linear-gradient(245deg, transparent 0 6px, rgba(255,255,255,.45) 6px 7px, transparent 7px 13px);
+    filter:drop-shadow(0 2px 2px rgba(90,70,40,.28));
+  }
+
+  /* ---------- 日期栏 ---------- */
+  .date-row{ display:flex; align-items:stretch; justify-content:center; gap:6px; margin:16px 0 6px; }
+  .date-cell{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border:1px solid var(--line-dark); background:linear-gradient(180deg,#fffdf6,#f3ead2);
+    border-radius:9px; padding:6px 10px; box-shadow:inset 0 1px 0 #fff;
+  }
+  .date-cell.wide{ min-width:96px; }
+  .date-cell .lbl{ font-size:9px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+  .date-cell .val{ font-family:var(--serif); font-size:20px; line-height:1.15; white-space:nowrap; color:var(--ink); }
+  .date-cell .val.day{ font-size:17px; }
+  .sep-dot{ align-self:center; width:5px; height:5px; border-radius:50%; background:var(--line-dark); opacity:.7; }
+
+  .date-cell.term{
+    background:linear-gradient(180deg,var(--accent-glow), rgba(255,255,255,.4));
+    border-color:var(--accent);
+  }
+  .date-cell.term .val{ color:var(--accent-ink); }
+
+  /* ---------- 农历 / 节气条 ---------- */
+  .lunar-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:6px 2px 18px; padding:7px 12px;
+    border:1px dashed var(--line); border-radius:10px;
+    background:rgba(255,255,255,.32);
+  }
+  .lunar-bar .left{
+    display:flex; align-items:center; gap:8px; font-family:var(--serif);
+    font-size:14px; letter-spacing:1px; color:#5d4a2c;
+  }
+  .lunar-bar .left .mark{ color:var(--gold); font-size:12px; }
+  .termpill{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; padding:3px 9px; border-radius:20px;
+    color:var(--muted); border:1px solid var(--line); background:#fffdf6;
+    font-family:var(--sans); white-space:nowrap;
+  }
+  .termpill.on{ color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent-ink)); border-color:transparent; box-shadow:0 2px 6px -2px var(--accent); }
+  .termpill .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
+
+  /* ---------- 成语面板 ---------- */
+  .idiom-panel{
+    position:relative; border:2px solid var(--gold); border-radius:14px;
+    background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0)), var(--accent-glow);
+    padding:20px 10px 16px; text-align:center; overflow:hidden;
+  }
+  .idiom-panel .wave{
+    position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background:radial-gradient(120px 40px at 50% 120%, rgba(255,255,255,.35), transparent 70%);
+  }
+  .top-orn{
+    position:absolute; top:-1px; left:50%; transform:translateX(-50%);
+    font-family:var(--serif); color:var(--gold); font-size:12px; letter-spacing:9px;
+    background:var(--paper); padding:0 9px; border-radius:4px; white-space:nowrap;
+  }
+  .idiom-big{ display:flex; justify-content:center; gap:8px; margin-top:10px; font-family:var(--serif); }
+  .idiom-big .ch{
+    font-size:66px; line-height:1; color:var(--accent);
+    text-shadow:0 1px 0 rgba(255,255,255,.6), 0 3px 6px rgba(0,0,0,.10);
+    animation:pop .45s ease;
+  }
+  .idiom-big .ch:nth-child(2){ animation-delay:.05s; }
+  .idiom-big .ch:nth-child(3){ animation-delay:.10s; }
+  .idiom-big .ch:nth-child(4){ animation-delay:.15s; }
+  @keyframes pop{ 0%{opacity:0; transform:translateY(6px) scale(.92);} 100%{opacity:1; transform:none;} }
+  .idiom-pinyin{
+    margin-top:12px; font-size:13px; letter-spacing:3px; color:var(--muted);
+    font-family:"Times New Roman",Georgia,serif;
+  }
+
+  /* ---------- 逐字拆解 ---------- */
+  .char-row{ display:flex; gap:8px; justify-content:center; margin:18px 0 22px; }
+  .char-cell{
+    flex:1 1 0; min-width:0; border:1px solid var(--line); border-radius:9px;
+    background:rgba(255,255,255,.38); padding:9px 4px 7px; text-align:center;
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .char-cell:hover{ transform:translateY(-3px); box-shadow:0 8px 16px -8px rgba(90,70,40,.4); background:#fff; }
+  .char-cell .big{ font-family:var(--serif); font-size:30px; line-height:1; color:var(--ink); }
+  .char-cell .py{ margin-top:5px; font-size:11px; color:var(--muted); font-family:"Times New Roman",Georgia,serif; }
+
+  /* ---------- 释义 / 例句 ---------- */
+  .body{ text-align:left; }
+  .block{ position:relative; margin:12px 0; padding-left:14px; }
+  .block::before{ content:""; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:3px; background:linear-gradient(180deg,var(--accent),transparent); }
+  .tag{
+    display:inline-block; font-size:10px; letter-spacing:2px; color:var(--accent-ink);
+    border:1px solid var(--accent); border-radius:5px; padding:1px 7px; margin-bottom:6px;
+    font-weight:600; text-transform:uppercase; background:var(--accent-glow);
+  }
+  .block p{ margin:3px 0 0; line-height:1.68; color:var(--ink); }
+  .block .py{ font-size:12px; color:var(--muted); font-style:italic; }
+  .block .en{ font-size:12px; color:#6f6a5a; }
+
+  /* ---------- 底注 ---------- */
+  .foot{
+    margin-top:16px; padding-top:12px; border-top:1px solid var(--line);
+    text-align:center; font-size:11px; color:var(--muted); letter-spacing:1px;
+  }
+
+  /* ---------- 底部控制 ---------- */
+  .controls{ position:relative; z-index:2; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; max-width:480px; width:100%; }
+  .controls .btn{ flex:1 1 auto; min-width:96px; }
+
+  @media (max-width:420px){
+    .idiom-big .ch{ font-size:54px; }
+    .date-cell .val{ font-size:17px; }
+    .date-cell.wide{ min-width:82px; }
+    .brand{ font-size:15px; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-dots"></div>
+
+  <div class="toolbar">
+    <span class="brand"><span class="seal">语</span>每日成语<small>· 黄历挂件</small></span>
+    <button class="btn ghost" id="btnAccent" title="切换卡片配色">配色·自动</button>
+    <button class="btn" id="btnToday">今天</button>
+  </div>
+
+  <div class="card">
+    <div class="pins"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="orn tl">❋</div><div class="orn tr">❋</div>
+    <div class="tear"></div>
+
+    <div class="date-row">
+      <div class="date-cell wide">
+        <span class="lbl">月·日</span>
+        <span class="val day" id="md">—月—日</span>
+      </div>
+      <div class="sep-dot"></div>
+      <div class="date-cell">
+        <span class="lbl">年</span>
+        <span class="val year" id="year">2026</span>
+      </div>
+      <div class="sep-dot"></div>
+      <div class="date-cell">
+        <span class="lbl">星期</span>
+        <span class="val" id="week">星期日</span>
+      </div>
+      <div class="sep-dot"></div>
+      <div class="date-cell term">
+        <span class="lbl">节气</span>
+        <span class="val" id="term">--</span>
+      </div>
+    </div>
+
+    <div class="lunar-bar">
+      <span class="left"><span class="mark">◈</span><span id="lunar">农历 --</span></span>
+      <span class="termpill" id="termpill"><span class="dot"></span><span id="termpillText">--</span></span>
+    </div>
+
+    <div class="idiom-panel">
+      <div class="wave"></div>
+      <span class="top-orn">❖ 成 语 ❖</span>
+      <div class="idiom-big" id="big"></div>
+      <div class="idiom-pinyin" id="pinyin"></div>
+    </div>
+
+    <div class="char-row" id="charRow"></div>
+
+    <div class="body">
+      <div class="block">
+        <span class="tag">释义 Meaning</span>
+        <p id="meaningCn"></p>
+        <p class="en" id="meaningEn"></p>
+      </div>
+      <div class="block">
+        <span class="tag">例句 Example</span>
+        <p id="exampleCn"></p>
+        <p class="py" id="examplePy"></p>
+        <p class="en" id="exampleEn"></p>
+      </div>
+    </div>
+
+    <div class="foot" id="foot"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" id="btnPrev">◀ 前一天</button>
+    <button class="btn primary" id="btnNext">后一天 ▶</button>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="data2.js"></script>
+  <script src="data3.js"></script>
+  <script src="lunar.js"></script>
+  <script>
+    const WEEK = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+    const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+    const state = { offset: 0, accent: "auto" };
+    const $ = id => document.getElementById(id);
+    const L = window.lunar;
+
+    function dayOfYear(date){
+      const start = new Date(date.getFullYear(),0,0);
+      return Math.floor((date - start)/86400000);
+    }
+    function idiomFor(date){
+      const n = dayOfYear(date);
+      return IDIOMS[(n - 1) % IDIOMS.length];
+    }
+
+    function render(){
+      const base = new Date();
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+      d.setDate(d.getDate() + state.offset);
+      const idiom = idiomFor(d);
+
+      const accent = state.accent === "auto" ? idiom.tone : state.accent;
+      document.documentElement.setAttribute("data-accent", accent);
+      $("btnAccent").textContent = "配色·" + (state.accent==="auto"?"自动":(state.accent==="R"?"红":"绿"));
+
+      $("md").textContent = MONTHS[d.getMonth()] + d.getDate() + "日";
+      $("year").textContent = d.getFullYear();
+      $("week").textContent = WEEK[d.getDay()];
+
+      // 农历 + 干支 + 生肖
+      const y = d.getFullYear(), m = d.getMonth()+1, dd = d.getDate();
+      const lu = L.lunarFromSolar(y,m,dd);
+      const gz = L.lunarYearGz(lu.lYear);
+      $("lunar").textContent = "农历 " + L.lunarLabel(lu) + " · " + gz.ganzhi + " " + gz.zodiac;
+
+      // 节气
+      const on = L.solarTermOf(y,m,dd);
+      if(on){
+        $("term").textContent = on.name;
+        $("term").parentElement.classList.add("term");
+        $("termpill").classList.add("on");
+        $("termpillText").textContent = "今日 · " + on.name;
+      } else {
+        const nx = L.nextSolarTerm(y,m,dd);
+        $("term").textContent = nx.days===0 ? "-" : (nx.days+"天");
+        $("term").parentElement.classList.remove("term");
+        $("termpill").classList.remove("on");
+        $("termpillText").textContent = nx.days===0 ? "" : "距「"+nx.name+"」"+nx.days+"天";
+      }
+
+      // 大字成语
+      $("big").innerHTML = idiom.idiom.split("").map(c=>`<span class="ch">${c}</span>`).join("");
+      $("pinyin").textContent = idiom.pinyin;
+
+      // 逐字拆解
+      $("charRow").innerHTML = idiom.chars.map(x=>`<div class="char-cell"><div class="big">${x.c}</div><div class="py">${x.p}</div></div>`).join("");
+
+      $("meaningCn").textContent = idiom.meaningCn;
+      $("meaningEn").textContent = idiom.meaningEn;
+      $("exampleCn").textContent = idiom.exampleCn;
+      $("examplePy").textContent = idiom.examplePy;
+      $("exampleEn").textContent = idiom.exampleEn;
+
+      $("foot").textContent = state.offset===0
+        ? `今天是 ${MONTHS[m]}${dd}日 · 成语「${idiom.idiom}」 · 已收录 ${IDIOMS.length} 条 · 点击「后一天」撕下一页`
+        : `${MONTHS[m]}${dd}日${dd===base.getDate()?"（今天）":""} · 「${idiom.idiom}」 · 点击「今天」返回`;
+    }
+
+    $("btnPrev").addEventListener("click", ()=>{ state.offset--; render(); });
+    $("btnNext").addEventListener("click", ()=>{ state.offset++; render(); });
+    $("btnToday").addEventListener("click", ()=>{ state.offset=0; render(); });
+    $("btnAccent").addEventListener("click", ()=>{
+      state.accent = state.accent==="auto"?"R":(state.accent==="R"?"G":"auto");
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
